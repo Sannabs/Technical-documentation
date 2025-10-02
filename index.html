@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Document metadata -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modem Pay Documentation</title>
+
+    <!-- External stylesheets -->
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -11,12 +14,16 @@
     />
   </head>
   <body>
+    <!-- Main layout container -->
     <div class="container">
+      <!-- Fixed sidebar navigation -->
       <nav class="sidebar">
+        <!-- Sidebar header with logo -->
         <div class="sidebar-header">
           <h1 class="logo">Modem Pay Doc</h1>
         </div>
 
+        <!-- Navigation section for Payment Intents -->
         <div class="nav-section">
           <h3 class="nav-title">Payment Intents</h3>
           <ul class="nav-list">
@@ -38,6 +45,7 @@
           </ul>
         </div>
 
+        <!-- Navigation section for Split Payments -->
         <div class="nav-section">
           <h3 class="nav-title">Split Payments</h3>
           <ul class="nav-list">
@@ -51,6 +59,7 @@
           </ul>
         </div>
 
+        <!-- Navigation section for Payouts -->
         <div class="nav-section">
           <h3 class="nav-title">Payouts</h3>
           <ul class="nav-list">
@@ -59,18 +68,24 @@
         </div>
       </nav>
 
+      <!-- Main content area -->
       <main class="main-content">
+        <!-- Create Payment Intent section -->
         <section id="create-payment" class="content-section">
+          <!-- Context description -->
           <p class="context-text">
             To pay GMD 450, but you do not specify a customer or any other
             optional parameters.
           </p>
 
+          <!-- Code example section -->
           <div class="code-section">
+            <!-- Code section header -->
             <div class="code-header">
               <span class="bullet">•</span>
               <span class="code-title">Request:</span>
             </div>
+            <!-- Code block with syntax highlighting -->
             <div class="code-block">
               <pre><code>const paymentIntent = await modemPay.paymentIntents.create({
   amount: 450,
@@ -81,6 +96,7 @@
             </div>
           </div>
 
+          <!-- Result description section -->
           <div class="code-section">
             <div class="code-header">
               <span class="bullet">•</span>

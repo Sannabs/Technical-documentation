@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modem Pay Documentation</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <nav class="sidebar">
+        <div class="sidebar-header">
+          <h1 class="logo">Modem Pay Doc</h1>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-title">Payment Intents</h3>
+          <ul class="nav-list">
+            <li>
+              <a href="#introduction" class="nav-link">Payment Intents</a>
+            </li>
+            <li>
+              <a href="#create-payment" class="nav-link active"
+                >Create a Payment Intent</a
+              >
+            </li>
+            <li><a href="#direct-charge" class="nav-link">Direct Charge</a></li>
+            <li>
+              <a href="#callbacks" class="nav-link">Payment Intent Callbacks</a>
+            </li>
+            <li>
+              <a href="#manage" class="nav-link">Manage Payment Intent</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-title">Split Payments</h3>
+          <ul class="nav-list">
+            <li><a href="#split-overview" class="nav-link">Overview</a></li>
+            <li><a href="#sub-accounts" class="nav-link">Sub-Accounts</a></li>
+            <li>
+              <a href="#initialize-split" class="nav-link"
+                >Initialize Split Payment</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3 class="nav-title">Payouts</h3>
+          <ul class="nav-list">
+            <li><a href="#payouts-overview" class="nav-link">Overview</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <section id="create-payment" class="content-section">
+          <p class="context-text">
+            To pay GMD 450, but you do not specify a customer or any other
+            optional parameters.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Request:</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const paymentIntent = await modemPay.paymentIntents.create({
+  amount: 450,
+  currency: 'gmd',
+  description: 'Payment for GMD 450'
+});</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Result:</span>
+            </div>
+            <p class="result-text">
+              A Payment Intent is created with a link to the payment page, where
+              the customer can complete the payment.
+            </p>
+          </div>
+        </section>
+
+        <section id="introduction" class="content-section">
+          <h1 class="page-title">Payment Intents</h1>
+          <p class="lead">
+            Payment Intents are the primary way to accept payments with Modem
+            Pay. They represent a payment request that can be completed by your
+            customer through a secure payment page.
+          </p>
+
+          <h2 class="section-title">How it works</h2>
+          <p>
+            When you create a Payment Intent, you specify the amount and
+            currency. Modem Pay generates a secure payment link that you can
+            send to your customer. The customer completes the payment using
+            their preferred payment method, and you receive real-time
+            notifications about the payment status.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Create Payment Intent</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+const paymentIntent = await modemPay.paymentIntents.create({
+  amount: 2000,
+  currency: 'gmd',
+  description: 'T-shirt purchase',
+  customer_email: 'customer@example.com'
+});
+
+console.log('Payment URL:', paymentIntent.payment_url);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <h2 class="section-title">Payment Intent Object</h2>
+          <div class="table-container">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>string</td>
+                  <td>Unique identifier for the payment intent</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>integer</td>
+                  <td>
+                    Amount in the smallest currency unit (e.g., 2000 = GMD
+                    20.00)
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>currency</code></td>
+                  <td>string</td>
+                  <td>Three-letter ISO currency code (e.g., 'gmd', 'usd')</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>string</td>
+                  <td>
+                    Payment status (pending, succeeded, failed, cancelled)
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>payment_url</code></td>
+                  <td>string</td>
+                  <td>URL where the customer can complete payment</td>
+                </tr>
+                <tr>
+                  <td><code>created_at</code></td>
+                  <td>timestamp</td>
+                  <td>Time when the payment intent was created</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="direct-charge" class="content-section">
+          <h1 class="page-title">Direct Charge</h1>
+          <p class="lead">
+            Direct Charge allows you to process payments immediately without
+            creating a Payment Intent first. This is useful for server-to-server
+            payments where you have the customer's payment details.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Direct Charge Request</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+const charge = await modemPay.charges.create({
+  amount: 2000,
+  currency: 'gmd',
+  source: 'tok_visa',
+  description: 'Direct charge',
+  customer_email: 'customer@example.com'
+});
+
+console.log('Charge status:', charge.status);
+console.log('Transaction ID:', charge.id);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Note:</strong> Direct charges are processed immediately and
+            cannot be cancelled once submitted. Use Payment Intents for
+            customer-initiated payments.
+          </div>
+
+          <h2 class="section-title">Charge Object</h2>
+          <div class="table-container">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>string</td>
+                  <td>Unique identifier for the charge</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>integer</td>
+                  <td>Amount charged in the smallest currency unit</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>string</td>
+                  <td>Charge status (succeeded, failed, pending)</td>
+                </tr>
+                <tr>
+                  <td><code>transaction_id</code></td>
+                  <td>string</td>
+                  <td>Bank transaction reference number</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="callbacks" class="content-section">
+          <h1 class="page-title">Payment Intent Callbacks</h1>
+          <p class="lead">
+            Configure webhooks to receive real-time notifications about payment
+            status changes. This allows you to update your application when
+            payments are completed, failed, or cancelled.
+          </p>
+
+          <h2 class="section-title">Webhook Events</h2>
+          <ul class="event-list">
+            <li>
+              <code>payment_intent.succeeded</code> - Payment completed
+              successfully
+            </li>
+            <li>
+              <code>payment_intent.failed</code> - Payment failed due to
+              insufficient funds or other issues
+            </li>
+            <li>
+              <code>payment_intent.cancelled</code> - Payment was cancelled by
+              the customer
+            </li>
+            <li>
+              <code>payment_intent.pending</code> - Payment is being processed
+            </li>
+          </ul>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Webhook Configuration</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+// Configure webhook endpoint
+const webhook = await modemPay.webhooks.create({
+  url: 'https://your-site.com/webhooks',
+  events: [
+    'payment_intent.succeeded', 
+    'payment_intent.failed',
+    'payment_intent.cancelled'
+  ]
+});
+
+console.log('Webhook created:', webhook.id);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Webhook Handler Example</span>
+            </div>
+            <div class="code-block">
+              <pre><code>// Express.js webhook handler
+app.post('/webhooks', (req, res) => {
+  const event = req.body;
+  
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      console.log('Payment succeeded:', event.data.id);
+      // Update your database, send confirmation email, etc.
+      break;
+    case 'payment_intent.failed':
+      console.log('Payment failed:', event.data.id);
+      // Handle failed payment
+      break;
+  }
+  
+  res.status(200).send('OK');
+});</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="manage" class="content-section">
+          <h1 class="page-title">Manage Payment Intent</h1>
+          <p class="lead">
+            Retrieve, update, or cancel existing Payment Intents. You can also
+            list all payment intents and filter them by status or date range.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Retrieve Payment Intent</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+// Retrieve a specific payment intent
+const paymentIntent = await modemPay.paymentIntents.retrieve('pi_1234567890');
+
+console.log('Status:', paymentIntent.status);
+console.log('Amount:', paymentIntent.amount);
+console.log('Payment URL:', paymentIntent.payment_url);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">List Payment Intents</span>
+            </div>
+            <div class="code-block">
+              <pre><code>// List all payment intents
+const paymentIntents = await modemPay.paymentIntents.list({
+  limit: 10,
+  status: 'pending'
+});
+
+console.log('Found', paymentIntents.data.length, 'payment intents');</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Cancel Payment Intent</span>
+            </div>
+            <div class="code-block">
+              <pre><code>// Cancel a payment intent
+const cancelled = await modemPay.paymentIntents.cancel('pi_1234567890');
+
+console.log('Cancelled:', cancelled.cancelled);
+console.log('New status:', cancelled.status);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Note:</strong> You can only cancel payment intents that are
+            in 'pending' status. Once a payment is completed or failed, it
+            cannot be cancelled.
+          </div>
+        </section>
+
+        <section id="split-overview" class="content-section">
+          <h1 class="page-title">Split Payments Overview</h1>
+          <p class="lead">
+            Split payments allow you to automatically distribute funds between
+            multiple recipients when a payment is completed. This is useful for
+            marketplaces, platforms, or any business that needs to share
+            revenue.
+          </p>
+
+          <h2 class="section-title">How Split Payments Work</h2>
+          <p>
+            When a customer makes a payment, Modem Pay automatically splits the
+            funds according to your predefined rules. Each recipient receives
+            their portion directly, and you can track all transactions through
+            the API.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Create Split Payment</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+const splitPayment = await modemPay.splitPayments.create({
+  amount: 10000,
+  currency: 'gmd',
+  description: 'Marketplace transaction',
+  splits: [
+    {
+      recipient: 'acc_merchant1',
+      amount: 8000,
+      description: 'Merchant commission'
+    },
+    {
+      recipient: 'acc_platform',
+      amount: 2000,
+      description: 'Platform fee'
+    }
+  ]
+});
+
+console.log('Split payment created:', splitPayment.id);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="sub-accounts" class="content-section">
+          <h1 class="page-title">Sub-Accounts</h1>
+          <p class="lead">
+            Sub-accounts are separate accounts within your Modem Pay account
+            that can receive split payments. Each sub-account has its own
+            balance and transaction history.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Create Sub-Account</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+const subAccount = await modemPay.subAccounts.create({
+  name: 'Merchant Account',
+  email: 'merchant@example.com',
+  description: 'Sub-account for merchant payments'
+});
+
+console.log('Sub-account created:', subAccount.id);
+console.log('Account ID:', subAccount.account_id);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <h2 class="section-title">Sub-Account Object</h2>
+          <div class="table-container">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>string</td>
+                  <td>Unique identifier for the sub-account</td>
+                </tr>
+                <tr>
+                  <td><code>account_id</code></td>
+                  <td>string</td>
+                  <td>Account ID used in split payments</td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td>string</td>
+                  <td>Display name for the sub-account</td>
+                </tr>
+                <tr>
+                  <td><code>balance</code></td>
+                  <td>integer</td>
+                  <td>Current balance in the smallest currency unit</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="initialize-split" class="content-section">
+          <h1 class="page-title">Initialize Split Payment</h1>
+          <p class="lead">
+            Initialize a split payment by creating a payment intent with split
+            configuration. The payment will be automatically distributed when
+            completed.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Initialize Split Payment</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+const splitPayment = await modemPay.paymentIntents.create({
+  amount: 5000,
+  currency: 'gmd',
+  description: 'Split payment example',
+  splits: [
+    {
+      recipient: 'acc_merchant1',
+      amount: 4000,
+      description: 'Merchant portion'
+    },
+    {
+      recipient: 'acc_platform',
+      amount: 1000,
+      description: 'Platform fee'
+    }
+  ]
+});
+
+console.log('Payment URL:', splitPayment.payment_url);
+console.log('Split configuration:', splitPayment.splits);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Note:</strong> Split payments are processed automatically
+            when the main payment is completed. Each recipient will receive
+            their portion according to the split configuration.
+          </div>
+        </section>
+
+        <section id="payouts-overview" class="content-section">
+          <h1 class="page-title">Payouts Overview</h1>
+          <p class="lead">
+            Payouts allow you to transfer funds from your Modem Pay account to
+            external bank accounts. You can schedule automatic payouts or
+            initiate them manually.
+          </p>
+
+          <h2 class="section-title">Creating Payouts</h2>
+          <p>
+            Payouts can be created for individual transfers or bulk transfers to
+            multiple recipients. You can also set up automatic payouts based on
+            your balance or schedule.
+          </p>
+
+          <div class="code-section">
+            <div class="code-header">
+              <span class="bullet">•</span>
+              <span class="code-title">Create Payout</span>
+            </div>
+            <div class="code-block">
+              <pre><code>const modemPay = require('modem-pay');
+
+const payout = await modemPay.payouts.create({
+  amount: 50000,
+  currency: 'gmd',
+  bank_account: {
+    account_number: '1234567890',
+    bank_code: '001',
+    account_name: 'John Doe'
+  },
+  description: 'Monthly payout'
+});
+
+console.log('Payout created:', payout.id);
+console.log('Status:', payout.status);</code></pre>
+              <button class="copy-button">Copy</button>
+            </div>
+          </div>
+
+          <h2 class="section-title">Payout Object</h2>
+          <div class="table-container">
+            <table class="api-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>string</td>
+                  <td>Unique identifier for the payout</td>
+                </tr>
+                <tr>
+                  <td><code>amount</code></td>
+                  <td>integer</td>
+                  <td>Amount to be paid out in smallest currency unit</td>
+                </tr>
+                <tr>
+                  <td><code>status</code></td>
+                  <td>string</td>
+                  <td>
+                    Payout status (pending, processing, completed, failed)
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>reference</code></td>
+                  <td>string</td>
+                  <td>Bank reference number for the transfer</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
